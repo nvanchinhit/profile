@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo mã QR</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* 100% chiều cao của viewport */
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #0066ff;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-primary {
+            background-color: #0066ff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+        }
+
+        .modal-body {
+            text-align: center;
+        }
+
+        #qr-code {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .loader {
+            position: fixed;
+            z-index: 9999;
+            left: 50%; /* Chuyển loader về giữa màn hình */
+            top: 50%; /* Chuyển loader về giữa màn hình */
+            transform: translate(-50%, -50%); /* Dịch chuyển loader về giữa màn hình */
+            background-color: rgba(255, 255, 255, 0.7);
+            display: none; /* Ẩn loader ban đầu */
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loader i {
+            font-size: 50px;
+            color: #0066ff;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loader" id="loader">
+        <i class="fas fa-circle-notch"></i>
+    </div>
+
+    <div class="container form-container">
+        <h1>Tạo mã QR</h1>
+        
+        <form id="qr-form">
+            <div class="form-group">
+                <label for="amount">Số tiền:</label>
+                <input type="text" class="form-control" id="amount" name="amount" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Nội dung:</label>
+                <input type="text" class="form-control" id="description" name="description" required>
+            </div>
+            <div class="form-group">
+                <label for="select-bank">Chọn ngân hàng:</label>
+                <select class="form-control" id="select-bank" name="select-bank">
+                    <option value="ACB">ACB</option>
+                    <option value="Vietcombank">Vietcombank</option>
+                    <option value="MBBank">MBBank</option>
+                    <!-- Thêm các ngân hàng khác vào đây -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="select-account">Số tài khoản:</label>
+                <select class="form-control" id="select-account" name="select-account">
+                    <!-- Số tài khoản sẽ được thêm tự động bằng JavaScript -->
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Tạo mã QR</button>
+        </form>
+    </div>
+
+    <!-- Modal QR -->
+    <div class="modal fade" id="modal-qr" tabindex="-1" role="dialog" aria-labelledby="modal-qr-label" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-qr-label">Mã QR</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img id="qr-code" src="" alt="QR Code">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery, Popper.js, Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Đối tượng lưu trữ số tài khoản theo từng ngân hàng
+            var bankAccounts = {
+                "ACB": ["16087671"],
+                "MBBank": ["271220056789"],
+                "Vietcombank": ["1037705046"]
+                // Thêm các ngân hàng và số tài khoản tương ứng vào đây
+            };
+
+            // Mặc định hiển thị số tài khoản cho ngân hàng ACB
+            var defaultBank = "ACB";
+            var defaultAccounts = bankAccounts[defaultBank];
+            if (defaultAccounts) {
+                defaultAccounts.forEach(function (account) {
+                    $('#select-account').append('<option value="' + account + '">' + account + '</option>');
+                });
+            }
+
+            // Sự kiện thay đổi chọn ngân hàng
+            $('#select-bank').change(function () {
+                var selectedBank = $(this).val();
+                var accounts = bankAccounts[selectedBank];
+
+                // Xóa tất cả các option cũ trong select số tài khoản
+                $('#select-account').empty();
+
+                // Thêm các option mới vào select số tài khoản
+                if (accounts) {
+                    accounts.forEach(function (account) {
+                        $('#select-account').append('<option value="' + account + '">' + account + '</option>');
+                    });
+                }
+            });
+
+            // Sự kiện submit form
+            $('#qr-form').submit(function (event) {
+                event.preventDefault();
+                var amount = $('#amount').val();
+                var description = $('#description').val();
+                var selectedBank = $('#select-bank').val();
+                var selectedAccount = $('#select-account').val();
+                
+                // Hiển thị loader khi đang xử lý
+                $('#loader').show();
+                
+                // Tạo URL API với các thông tin được lấy từ form và select
+                var apiUrl = 'https://img.vietqr.io/image/' + selectedBank.toLowerCase() + '-' + selectedAccount + '-compact.png?amount=' + amount + '&addInfo=' + encodeURIComponent(description);
+                
+                // Đặt src của hình ảnh QR
+                $('#qr-code').attr('src', apiUrl);
+
+                // Hiển thị modal QR khi tải xong
+                $('#modal-qr').modal('show');
+                
+                // Ẩn loader khi đã tải xong QR
+                $('#loader').hide();
+            });
+        });
+    </script>
+    <script src="assets/frontend/default/js/f12.js"></script>
+</body>
+</html>
