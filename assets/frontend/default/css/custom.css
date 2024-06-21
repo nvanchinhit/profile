@@ -1,0 +1,22 @@
+.button-theme.button-theme_primary_custom {
+    border-color: #007bff;
+    background-color: #007bff;
+}
+
+.seller-left .seller-header .seller-avatar .seller-tick {
+    background: #007bff !important;
+}
+
+.scam-card .scam-title {
+    width: 30% !important;
+}
+
+.service-card .card-price>span {
+    font-size: 1.5em !important;
+}
+
+.comments-list .comment-item .comment-left .comment-avatar {
+    width: 55px !important;
+    margin: 0 auto 4px !important;
+    overflow: hidden;
+}
