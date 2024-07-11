@@ -13,19 +13,16 @@
         body {
             background-color: #f8f9fa;
             font-family: 'Inter', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh; /* 100% chiều cao của viewport */
+            height: 100vh;
+            margin: 0;
         }
 
         .form-container {
-            width: 100%;
-            max-width: 500px;
             background-color: #ffffff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
         }
 
         .form-container h1 {
@@ -81,11 +78,11 @@
         .loader {
             position: fixed;
             z-index: 9999;
-            left: 50%; /* Chuyển loader về giữa màn hình */
-            top: 50%; /* Chuyển loader về giữa màn hình */
-            transform: translate(-50%, -50%); /* Dịch chuyển loader về giữa màn hình */
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
             background-color: rgba(255, 255, 255, 0.7);
-            display: none; /* Ẩn loader ban đầu */
+            display: none;
             justify-content: center;
             align-items: center;
         }
@@ -104,43 +101,64 @@
                 transform: rotate(360deg);
             }
         }
+        h3{
+            color: #0066ff;
+            font-weight: 600;
+        }
+        p{
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
-
     <div class="loader" id="loader">
         <i class="fas fa-circle-notch"></i>
     </div>
 
-    <div class="container form-container">
-        <h1>Tạo mã QR</h1>
-        
-        <form id="qr-form">
-            <div class="form-group">
-                <label for="amount">Số tiền:</label>
-                <input type="text" class="form-control" id="amount" name="amount" required>
+    <div class="container d-flex align-items-center justify-content-center" style="height: 100vh;">
+        <div class="row w-100">
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <div class="form-container" id="payment-instructions">
+                    <h3>HƯỚNG DẪN SỬ DỤNG</h3>
+                    <p>Nhập nội dung và số tiền cần chuyển<br>
+                    Chọn ngân hàng cần chuyển tới<br>
+                    Lấy QR và vào ngân hàng quét thanh toán</p>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="description">Nội dung:</label>
-                <input type="text" class="form-control" id="description" name="description" required>
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <div>
+                    <div class="form-container">
+                        <h1>Tạo QR Thanh Toán</h1>
+                        
+                        <form id="qr-form">
+                            <div class="form-group">
+                                <label for="amount">Số tiền:</label>
+                                <input type="text" class="form-control" id="amount" name="amount" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Nội dung:</label>
+                                <input type="text" class="form-control" id="description" name="description" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="select-bank">Chọn ngân hàng:</label>
+                                <select class="form-control" id="select-bank" name="select-bank">
+                                    <option value="ACB">ACB</option>
+                                    <option value="MBBank">MBBank</option>
+                                    <!-- Thêm các ngân hàng khác vào đây -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="select-account">Số tài khoản:</label>
+                                <select class="form-control" id="select-account" name="select-account">
+                                    <!-- Số tài khoản sẽ được thêm tự động bằng JavaScript -->
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Tạo mã QR</button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="select-bank">Chọn ngân hàng:</label>
-                <select class="form-control" id="select-bank" name="select-bank">
-                    <option value="ACB">ACB</option>
-                    <option value="Vietcombank">Vietcombank</option>
-                    <option value="MBBank">MBBank</option>
-                    <!-- Thêm các ngân hàng khác vào đây -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="select-account">Số tài khoản:</label>
-                <select class="form-control" id="select-account" name="select-account">
-                    <!-- Số tài khoản sẽ được thêm tự động bằng JavaScript -->
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">Tạo mã QR</button>
-        </form>
+        </div>
     </div>
 
     <!-- Modal QR -->
@@ -148,7 +166,7 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modal-qr-label">Quét QR Để Thanh Toán</h5>
+                    <h5 class="modal-title" id="modal-qr-label">Mã QR</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -170,8 +188,6 @@
             var bankAccounts = {
                 "ACB": ["16087671"],
                 "MBBank": ["271220056789"],
-                "Vietcombank": ["1037705046"]
-                // Thêm các ngân hàng và số tài khoản tương ứng vào đây
             };
 
             // Mặc định hiển thị số tài khoản cho ngân hàng ACB
@@ -216,6 +232,12 @@
                 // Đặt src của hình ảnh QR
                 $('#qr-code').attr('src', apiUrl);
 
+                // Cập nhật thông tin QR
+                $('#bank-info').text('Ngân hàng: ' + selectedBank);
+                $('#account-number').text('Số tài khoản: ' + selectedAccount);
+                $('#account-holder').text('Chủ tài khoản: NGUYEN VAN CHINH');
+                $('#transfer-content').text('Nội dung chuyển: ' + description);
+                
                 // Hiển thị modal QR khi tải xong
                 $('#modal-qr').modal('show');
                 
